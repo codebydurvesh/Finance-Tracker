@@ -1,4 +1,10 @@
-// Frontend entry point
-// TODO: Will be implemented in Task 8
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
 
-console.log("Finance Tracker Frontend - Ready for setup");
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
