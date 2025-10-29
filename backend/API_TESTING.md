@@ -308,3 +308,81 @@ Invoke-RestMethod -Uri "http://localhost:5000/api/transactions" -Method Get -Hea
 $token = "your_jwt_token_here"
 Invoke-RestMethod -Uri "http://localhost:5000/api/transactions/summary" -Method Get -Headers @{ "Authorization" = "Bearer $token" }
 ```
+
+
+---
+
+## User Settings Endpoints
+
+### 10. Get User Profile
+**GET** `http://localhost:5000/api/users/me`
+
+**Headers:**
+``
+Authorization: Bearer <your_jwt_token>
+``
+
+**Success Response (200):**
+``json
+{
+  "_id": "user_id",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "monthlyBudget": 10000,
+  "createdAt": "2025-10-29T..."
+}
+``
+
+---
+
+### 11. Update User Profile
+**PUT** `http://localhost:5000/api/users/me`
+
+**Headers:**
+``
+Authorization: Bearer <your_jwt_token>
+Content-Type: application/json
+``
+
+**Body (JSON):**
+``json
+{
+  "name": "Updated Name",
+  "email": "newemail@example.com"
+}
+``
+
+---
+
+### 12. Update Monthly Budget
+**PUT** `http://localhost:5000/api/users/budget`
+
+**Headers:**
+``
+Authorization: Bearer <your_jwt_token>
+Content-Type: application/json
+``
+
+**Body (JSON):**
+``json
+{
+  "monthlyBudget": 15000
+}
+``
+
+**Success Response (200):**
+``json
+{
+  "_id": "user_id",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "monthlyBudget": 15000
+}
+``
+
+**PowerShell Example:**
+``powershell
+$token = "your_jwt_token_here"
+$body = @{ monthlyBudget = 15000 } | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:5000/api/users/budget" -Method Put -Headers @{ "Authorization" = "Bearer $token" } -ContentType "application/json" -Body $body
+``
