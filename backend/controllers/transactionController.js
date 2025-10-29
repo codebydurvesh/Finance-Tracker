@@ -111,9 +111,9 @@ const updateTransaction = async (req, res) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // Check ownership
+    // Check ownership - return 404 to not leak information
     if (transaction.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: "Not authorized" });
+      return res.status(404).json({ message: "Transaction not found" });
     }
 
     // Validate type if provided
@@ -155,9 +155,9 @@ const deleteTransaction = async (req, res) => {
       return res.status(404).json({ message: "Transaction not found" });
     }
 
-    // Check ownership
+    // Check ownership - return 404 to not leak information
     if (transaction.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: "Not authorized" });
+      return res.status(404).json({ message: "Transaction not found" });
     }
 
     await transaction.deleteOne();

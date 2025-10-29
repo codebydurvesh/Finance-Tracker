@@ -46,16 +46,22 @@ const registerUser = async (req, res) => {
 
     if (user) {
       res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        monthlyBudget: user.monthlyBudget,
         token: generateToken(user._id),
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          monthlyBudget: user.monthlyBudget,
+        },
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });
     }
   } catch (error) {
+    // Handle Mongoose validation errors
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 };
@@ -77,11 +83,13 @@ const loginUser = async (req, res) => {
 
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        monthlyBudget: user.monthlyBudget,
         token: generateToken(user._id),
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          monthlyBudget: user.monthlyBudget,
+        },
       });
     } else {
       res.status(401).json({ message: "Invalid credentials" });
