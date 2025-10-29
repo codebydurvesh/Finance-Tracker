@@ -5,9 +5,12 @@ import {
   getTransactions,
   getTransactionSummary,
   createTransaction,
+  updateTransaction,
+  deleteTransaction,
 } from "../services/transactionService";
 import { updateBudget } from "../services/userService";
 import { formatCurrency } from "../utils/helpers";
+import TransactionsList from "../components/TransactionsList";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -139,6 +142,53 @@ const Dashboard = () => {
       ...transactionForm,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleUpdateTransaction = async (id, updatedData) => {
+    try {
+      const updatedTransaction = await updateTransaction(id, updatedData);
+
+      // Update transactions list
+      setTransactions(
+        transactions.map((t) => (t._id === id ? updatedTransaction : t))
+      );
+
+      // Recalculate summary
+      await fetchSummary();
+
+      setSuccess("Transaction updated successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update transaction");
+      throw err;
+    }
+  };
+
+  const handleDeleteTransaction = async (id) => {
+    try {
+      await deleteTransaction(id);
+
+      // Remove from transactions list
+      setTransactions(transactions.filter((t) => t._id !== id));
+
+      // Recalculate summary
+      await fetchSummary();
+
+      setSuccess("Transaction deleted successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete transaction");
+      throw err;
+    }
+  };
+
+  const fetchSummary = async () => {
+    try {
+      const summaryData = await getTransactionSummary();
+      setSummary(summaryData);
+    } catch (err) {
+      console.error("Failed to fetch summary:", err);
+    }
   };
 
   return (
@@ -327,6 +377,13 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Full Transactions List with Edit/Delete */}
+      <TransactionsList
+        transactions={transactions}
+        onUpdate={handleUpdateTransaction}
+        onDelete={handleDeleteTransaction}
+      />
     </div>
   );
 };
