@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -8,7 +8,7 @@ import {
   updateTransaction,
   deleteTransaction,
 } from "../services/transactionService";
-import { updateBudget } from "../services/userService";
+import { updateBudget, getUserProfile } from "../services/userService";
 import { formatCurrency } from "../utils/helpers";
 import TransactionsList from "../components/TransactionsList";
 import PieChartAnalytics from "../components/PieChartAnalytics";
@@ -17,6 +17,7 @@ import "./Dashboard.css";
 const Dashboard = () => {
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
+  const pieChartRef = useRef(null);
 
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({
@@ -45,12 +46,19 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [transactionsData, summaryData] = await Promise.all([
+      const [transactionsData, summaryData, userProfile] = await Promise.all([
         getTransactions(),
         getTransactionSummary(),
+        getUserProfile(),
       ]);
       setTransactions(transactionsData);
       setSummary(summaryData);
+
+      // Update monthly budget from server
+      if (userProfile && userProfile.monthlyBudget !== undefined) {
+        setMonthlyBudget(userProfile.monthlyBudget);
+        updateUser(userProfile);
+      }
     } catch (err) {
       setError("Failed to load data");
       console.error(err);
@@ -131,6 +139,14 @@ const Dashboard = () => {
 
       setSuccess("Transaction added successfully!");
       setTimeout(() => setSuccess(""), 3000);
+
+      // Scroll to pie chart
+      setTimeout(() => {
+        pieChartRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add transaction");
     } finally {
@@ -255,7 +271,9 @@ const Dashboard = () => {
       <div className="summary-section">
         <div className="summary-card income">
           <h3>Total Income</h3>
-          <p className="amount">{formatCurrency(summary.totalIncome)}</p>
+          <p className="amount">
+            {formatCurrency(summary.totalIncome + monthlyBudget)}
+          </p>
         </div>
         <div className="summary-card expense">
           <h3>Total Expense</h3>
@@ -263,7 +281,11 @@ const Dashboard = () => {
         </div>
         <div className="summary-card balance">
           <h3>Net Balance</h3>
-          <p className="amount">{formatCurrency(summary.netBalance)}</p>
+          <p className="amount">
+            {formatCurrency(
+              summary.totalIncome + monthlyBudget - summary.totalExpense
+            )}
+          </p>
         </div>
       </div>
 
@@ -380,7 +402,12 @@ const Dashboard = () => {
       </div>
 
       {/* Pie Chart Analytics */}
-      <PieChartAnalytics transactions={transactions} />
+      <div ref={pieChartRef}>
+        <PieChartAnalytics
+          transactions={transactions}
+          monthlyBudget={monthlyBudget}
+        />
+      </div>
 
       {/* Full Transactions List with Edit/Delete */}
       <TransactionsList
