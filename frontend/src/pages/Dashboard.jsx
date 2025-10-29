@@ -1,41 +1,331 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import {
+  getTransactions,
+  getTransactionSummary,
+  createTransaction,
+} from "../services/transactionService";
+import { updateBudget } from "../services/userService";
+import { formatCurrency } from "../utils/helpers";
 import "./Dashboard.css";
 
 const Dashboard = () => {
+  const { user, logout, updateUser } = useAuth();
+  const navigate = useNavigate();
+
+  const [transactions, setTransactions] = useState([]);
+  const [summary, setSummary] = useState({
+    totalIncome: 0,
+    totalExpense: 0,
+    netBalance: 0,
+  });
+  const [monthlyBudget, setMonthlyBudget] = useState(user?.monthlyBudget || 0);
+  const [budgetInput, setBudgetInput] = useState("");
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
+
+  const [transactionForm, setTransactionForm] = useState({
+    title: "",
+    amount: "",
+    type: "expense",
+    category: "Other",
+    date: new Date().toISOString().split("T")[0],
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [transactionsData, summaryData] = await Promise.all([
+        getTransactions(),
+        getTransactionSummary(),
+      ]);
+      setTransactions(transactionsData);
+      setSummary(summaryData);
+    } catch (err) {
+      setError("Failed to load data");
+      console.error(err);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  const handleBudgetUpdate = async () => {
+    if (!budgetInput || isNaN(budgetInput) || Number(budgetInput) < 0) {
+      setError("Please enter a valid budget amount");
+      return;
+    }
+
+    try {
+      const updatedUser = await updateBudget(Number(budgetInput));
+      setMonthlyBudget(updatedUser.monthlyBudget);
+      updateUser(updatedUser);
+      setIsEditingBudget(false);
+      setSuccess("Budget updated successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Failed to update budget");
+      console.error(err);
+    }
+  };
+
+  const handleTransactionSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!transactionForm.title || !transactionForm.amount) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    if (Number(transactionForm.amount) <= 0) {
+      setError("Amount must be greater than 0");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const newTransaction = await createTransaction({
+        ...transactionForm,
+        amount: Number(transactionForm.amount),
+      });
+
+      setTransactions([newTransaction, ...transactions]);
+
+      // Update summary
+      if (transactionForm.type === "income") {
+        setSummary({
+          ...summary,
+          totalIncome: summary.totalIncome + newTransaction.amount,
+          netBalance: summary.netBalance + newTransaction.amount,
+        });
+      } else {
+        setSummary({
+          ...summary,
+          totalExpense: summary.totalExpense + newTransaction.amount,
+          netBalance: summary.netBalance - newTransaction.amount,
+        });
+      }
+
+      // Reset form
+      setTransactionForm({
+        title: "",
+        amount: "",
+        type: "expense",
+        category: "Other",
+        date: new Date().toISOString().split("T")[0],
+      });
+
+      setSuccess("Transaction added successfully!");
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to add transaction");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFormChange = (e) => {
+    setTransactionForm({
+      ...transactionForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
     <div className="dashboard-container">
+      {/* Header */}
       <header className="dashboard-header">
-        <h1>Finance Tracker Dashboard</h1>
-        <p>Dashboard implementation will be completed in Task 10</p>
+        <div className="header-content">
+          <div className="header-left">
+            <h1>💰 Finance Tracker</h1>
+            <p>Welcome, {user?.name}!</p>
+          </div>
+          <button onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
       </header>
-      <div className="dashboard-content">
-        <div className="info-box">
-          <h2>✅ Backend Complete</h2>
-          <ul>
-            <li>User Authentication</li>
-            <li>Transaction CRUD API</li>
-            <li>Budget Management</li>
-            <li>18 Passing Tests</li>
-          </ul>
+
+      {/* Messages */}
+      {error && <div className="message error-message">{error}</div>}
+      {success && <div className="message success-message">{success}</div>}
+
+      {/* Budget Section */}
+      <div className="budget-section">
+        <h3>Monthly Budget</h3>
+        {!isEditingBudget ? (
+          <div className="budget-display">
+            <span className="budget-amount">
+              {formatCurrency(monthlyBudget)}
+            </span>
+            <button
+              onClick={() => {
+                setBudgetInput(monthlyBudget);
+                setIsEditingBudget(true);
+              }}
+              className="edit-btn"
+            >
+              Edit
+            </button>
+          </div>
+        ) : (
+          <div className="budget-edit">
+            <input
+              type="number"
+              value={budgetInput}
+              onChange={(e) => setBudgetInput(e.target.value)}
+              placeholder="Enter monthly budget"
+              min="0"
+            />
+            <button onClick={handleBudgetUpdate} className="save-btn">
+              Save
+            </button>
+            <button
+              onClick={() => setIsEditingBudget(false)}
+              className="cancel-btn"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Summary Cards */}
+      <div className="summary-section">
+        <div className="summary-card income">
+          <h3>Total Income</h3>
+          <p className="amount">{formatCurrency(summary.totalIncome)}</p>
         </div>
-        <div className="info-box">
-          <h2>🚀 Frontend Setup Complete</h2>
-          <ul>
-            <li>React Router</li>
-            <li>Axios API Service</li>
-            <li>Auth Context</li>
-            <li>Recharts Ready</li>
-          </ul>
+        <div className="summary-card expense">
+          <h3>Total Expense</h3>
+          <p className="amount">{formatCurrency(summary.totalExpense)}</p>
         </div>
-        <div className="info-box">
-          <h2>📋 Next Steps</h2>
-          <ul>
-            <li>Task 9: Auth UI (Login/Register)</li>
-            <li>Task 10: Dashboard Layout</li>
-            <li>Task 11: Transaction List</li>
-            <li>Task 12: Pie Chart Analytics</li>
-          </ul>
+        <div className="summary-card balance">
+          <h3>Net Balance</h3>
+          <p className="amount">{formatCurrency(summary.netBalance)}</p>
         </div>
+      </div>
+
+      {/* Add Transaction Form */}
+      <div className="transaction-form-section">
+        <h3>Add Transaction</h3>
+        <form onSubmit={handleTransactionSubmit} className="transaction-form">
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="title">Title *</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={transactionForm.title}
+                onChange={handleFormChange}
+                placeholder="e.g., Salary, Grocery"
+                disabled={loading}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="amount">Amount *</label>
+              <input
+                type="number"
+                id="amount"
+                name="amount"
+                value={transactionForm.amount}
+                onChange={handleFormChange}
+                placeholder="0"
+                min="0.01"
+                step="0.01"
+                disabled={loading}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="type">Type *</label>
+              <select
+                id="type"
+                name="type"
+                value={transactionForm.type}
+                onChange={handleFormChange}
+                disabled={loading}
+              >
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label htmlFor="category">Category</label>
+              <input
+                type="text"
+                id="category"
+                name="category"
+                value={transactionForm.category}
+                onChange={handleFormChange}
+                placeholder="e.g., Food, Transport"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="date">Date *</label>
+              <input
+                type="date"
+                id="date"
+                name="date"
+                value={transactionForm.date}
+                onChange={handleFormChange}
+                disabled={loading}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <button type="submit" className="add-btn" disabled={loading}>
+                {loading ? "Adding..." : "Add Transaction"}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {/* Transactions Preview */}
+      <div className="transactions-preview">
+        <h3>Recent Transactions</h3>
+        {transactions.length === 0 ? (
+          <p className="no-data">
+            No transactions yet. Add your first transaction above!
+          </p>
+        ) : (
+          <div className="transactions-list">
+            {transactions.slice(0, 5).map((transaction) => (
+              <div key={transaction._id} className="transaction-item">
+                <div className="transaction-info">
+                  <span className="transaction-title">{transaction.title}</span>
+                  <span className="transaction-category">
+                    {transaction.category}
+                  </span>
+                </div>
+                <span className={`transaction-amount ${transaction.type}`}>
+                  {transaction.type === "income" ? "+" : "-"}
+                  {formatCurrency(transaction.amount)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
