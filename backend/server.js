@@ -22,8 +22,8 @@ app.get("/", (req, res) => {
   });
 });
 
-// API routes will be added here in future tasks
-// app.use('/api/auth', require('./routes/authRoutes'));
+// API routes
+app.use("/api/auth", require("./routes/authRoutes"));
 // app.use('/api/transactions', require('./routes/transactionRoutes'));
 // app.use('/api/users', require('./routes/userRoutes'));
 
