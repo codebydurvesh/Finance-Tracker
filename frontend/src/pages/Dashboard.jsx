@@ -11,6 +11,7 @@ import {
 import { updateBudget } from "../services/userService";
 import { formatCurrency } from "../utils/helpers";
 import TransactionsList from "../components/TransactionsList";
+import PieChartAnalytics from "../components/PieChartAnalytics";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -377,6 +378,9 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      {/* Pie Chart Analytics */}
+      <PieChartAnalytics transactions={transactions} />
 
       {/* Full Transactions List with Edit/Delete */}
       <TransactionsList
