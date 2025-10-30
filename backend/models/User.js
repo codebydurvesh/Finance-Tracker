@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    currency: {
+      type: String,
+      default: "INR",
+      enum: ["USD", "EUR", "GBP", "INR", "JPY", "AUD", "CAD", "CNY", "CHF", "SEK"],
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields

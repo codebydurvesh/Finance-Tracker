@@ -17,6 +17,7 @@ const getUserProfile = async (req, res) => {
       name: user.name,
       email: user.email,
       monthlyBudget: user.monthlyBudget,
+      currency: user.currency,
       googleId: user.googleId,
       profilePicture: user.profilePicture,
       createdAt: user.createdAt,
@@ -51,6 +52,7 @@ const updateUserProfile = async (req, res) => {
       }
       user.email = req.body.email;
     }
+    if (req.body.currency) user.currency = req.body.currency;
 
     const updatedUser = await user.save();
 
@@ -60,6 +62,7 @@ const updateUserProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         monthlyBudget: updatedUser.monthlyBudget,
+        currency: updatedUser.currency,
         googleId: updatedUser.googleId,
         profilePicture: updatedUser.profilePicture,
       },

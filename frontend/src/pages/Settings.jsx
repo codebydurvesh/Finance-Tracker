@@ -159,15 +159,13 @@ const Settings = () => {
         pauseOnHover
       />
 
-      {/* Back Button - Top Right */}
-      <button onClick={() => navigate("/dashboard")} className="back-btn-top">
-        ← Back to Dashboard
-      </button>
-
       <div className="settings-content">
         <div className="settings-header">
           <h1>⚙️ Settings</h1>
           <p>Manage your account settings</p>
+          <button onClick={() => navigate("/dashboard")} className="back-btn">
+            ← Back to Dashboard
+          </button>
         </div>
 
         {error && <div className="error-message">{error}</div>}

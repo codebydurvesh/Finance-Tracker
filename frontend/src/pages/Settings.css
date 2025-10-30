@@ -5,26 +5,14 @@
   position: relative;
 }
 
-.back-btn-top {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-weight: 600;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  color: #667eea;
+.back-btn {
+  margin-top: 20px;
+  color: black;
 }
 
-.back-btn-top:hover {
+.back-btn:hover {
   background: #667eea;
-  color: white;
+  color: black;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
