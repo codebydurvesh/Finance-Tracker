@@ -24,6 +24,33 @@ const Dashboard = () => {
   const pieChartRef = useRef(null);
   const alertRef = useRef(null);
 
+  // Predefined categories
+  const EXPENSE_CATEGORIES = [
+    "Food & Dining",
+    "Transportation",
+    "Shopping",
+    "Entertainment",
+    "Bills & Utilities",
+    "Healthcare",
+    "Education",
+    "Travel",
+    "Groceries",
+    "Rent/Mortgage",
+    "Other",
+    "Custom",
+  ];
+
+  const INCOME_CATEGORIES = [
+    "Salary",
+    "Freelance",
+    "Business",
+    "Investment",
+    "Gift",
+    "Bonus",
+    "Other",
+    "Custom",
+  ];
+
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({
     totalIncome: 0,
@@ -45,9 +72,11 @@ const Dashboard = () => {
     title: "",
     amount: "",
     type: "expense",
-    category: "Other",
+    category: "", // Empty by default - user must select
     day: new Date().getDate(), // Just store the day
   });
+  const [customCategory, setCustomCategory] = useState("");
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -191,7 +220,8 @@ const Dashboard = () => {
     if (
       !transactionForm.title ||
       !transactionForm.amount ||
-      !transactionForm.day
+      !transactionForm.day ||
+      !transactionForm.category
     ) {
       toast.error("Please fill in all required fields");
       return;
@@ -299,9 +329,11 @@ const Dashboard = () => {
         title: "",
         amount: "",
         type: "expense",
-        category: "Other",
+        category: "", // Reset to empty - user must select
         day: defaultDay,
       });
+      setCustomCategory("");
+      setShowCustomCategory(false);
 
       toast.success("Transaction added successfully!");
 
@@ -343,9 +375,46 @@ const Dashboard = () => {
   };
 
   const handleFormChange = (e) => {
+    const { name, value } = e.target;
+
+    // Handle category selection
+    if (name === "category") {
+      if (value === "Custom") {
+        setShowCustomCategory(true);
+        setTransactionForm({
+          ...transactionForm,
+          category: customCategory || "",
+        });
+      } else {
+        setShowCustomCategory(false);
+        setTransactionForm({
+          ...transactionForm,
+          category: value,
+        });
+      }
+    }
+    // Handle type change - reset category to empty for that type
+    else if (name === "type") {
+      setShowCustomCategory(false);
+      setTransactionForm({
+        ...transactionForm,
+        type: value,
+        category: "", // Reset to empty when type changes
+      });
+    } else {
+      setTransactionForm({
+        ...transactionForm,
+        [name]: value,
+      });
+    }
+  };
+
+  const handleCustomCategoryChange = (e) => {
+    const value = e.target.value;
+    setCustomCategory(value);
     setTransactionForm({
       ...transactionForm,
-      [e.target.name]: e.target.value,
+      category: value,
     });
   };
 
@@ -632,18 +701,57 @@ const Dashboard = () => {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label htmlFor="category">Category</label>
-                  <input
-                    type="text"
+                  <label htmlFor="category">
+                    Category *
+                    <span className="field-hint">
+                      {" "}
+                      (Helps organize your {transactionForm.type}s)
+                    </span>
+                  </label>
+                  <select
                     id="category"
                     name="category"
-                    value={transactionForm.category}
+                    value={
+                      showCustomCategory ? "Custom" : transactionForm.category
+                    }
                     onChange={handleFormChange}
-                    placeholder="e.g., Food, Transport"
                     disabled={loading}
-                  />
+                    required
+                  >
+                    <option value="" disabled>
+                      -- Select a category --
+                    </option>
+                    {(transactionForm.type === "expense"
+                      ? EXPENSE_CATEGORIES
+                      : INCOME_CATEGORIES
+                    ).map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
+
+              {/* Custom Category Input */}
+              {showCustomCategory && (
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="customCategory">
+                      Custom Category Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="customCategory"
+                      value={customCategory}
+                      onChange={handleCustomCategoryChange}
+                      placeholder="Enter your custom category"
+                      disabled={loading}
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="form-row">
                 <div className="form-group">
