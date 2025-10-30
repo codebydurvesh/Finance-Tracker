@@ -19,6 +19,7 @@ const Dashboard = () => {
   const { user, logout, updateUser } = useAuth();
   const navigate = useNavigate();
   const pieChartRef = useRef(null);
+  const alertRef = useRef(null);
 
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({
@@ -52,7 +53,13 @@ const Dashboard = () => {
         getTransactionSummary(),
         getUserProfile(),
       ]);
-      setTransactions(transactionsData);
+
+      // Sort transactions by date (newest first)
+      const sortedTransactions = transactionsData.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+      });
+
+      setTransactions(sortedTransactions);
       setSummary(summaryData);
 
       // Update monthly budget from server
@@ -141,12 +148,29 @@ const Dashboard = () => {
       setSuccess("Transaction added successfully!");
       setTimeout(() => setSuccess(""), 3000);
 
-      // Scroll to pie chart
+      // Calculate if budget is exceeded after this transaction
+      const updatedTotalIncome =
+        summary.totalIncome +
+        monthlyBudget +
+        (transactionForm.type === "income" ? newTransaction.amount : 0);
+      const updatedTotalExpense =
+        summary.totalExpense +
+        (transactionForm.type === "expense" ? newTransaction.amount : 0);
+      const isBudgetExceeded = updatedTotalExpense > updatedTotalIncome;
+
+      // Scroll to top if budget exceeded, otherwise scroll to pie chart
       setTimeout(() => {
-        pieChartRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        if (isBudgetExceeded) {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          });
+        } else if (pieChartRef.current) {
+          pieChartRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
       }, 100);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to add transaction");
@@ -166,10 +190,15 @@ const Dashboard = () => {
     try {
       const updatedTransaction = await updateTransaction(id, updatedData);
 
-      // Update transactions list
-      setTransactions(
-        transactions.map((t) => (t._id === id ? updatedTransaction : t))
+      // Update transactions list and re-sort
+      const updatedList = transactions.map((t) =>
+        t._id === id ? updatedTransaction : t
       );
+      const sortedList = updatedList.sort((a, b) => {
+        return new Date(b.date) - new Date(a.date);
+      });
+
+      setTransactions(sortedList);
 
       // Recalculate summary
       await fetchSummary();
@@ -269,11 +298,13 @@ const Dashboard = () => {
       </div>
 
       {/* Budget Alert */}
-      <BudgetAlert
-        totalIncome={summary.totalIncome + monthlyBudget}
-        totalExpense={summary.totalExpense}
-        monthlyBudget={monthlyBudget}
-      />
+      <div ref={alertRef}>
+        <BudgetAlert
+          totalIncome={summary.totalIncome + monthlyBudget}
+          totalExpense={summary.totalExpense}
+          monthlyBudget={monthlyBudget}
+        />
+      </div>
 
       {/* Summary Cards */}
       <div className="summary-section">
@@ -287,7 +318,8 @@ const Dashboard = () => {
           className={`summary-card expense ${
             summary.totalExpense > summary.totalIncome + monthlyBudget
               ? "danger"
-              : summary.totalExpense >= (summary.totalIncome + monthlyBudget) * 0.9
+              : summary.totalExpense >=
+                (summary.totalIncome + monthlyBudget) * 0.9
               ? "warning"
               : ""
           }`}
