@@ -15,6 +15,7 @@ const PieChartAnalytics = ({ transactions, monthlyBudget = 0 }) => {
   const COLORS = {
     expense: "#f97316", // Orange for spent money
     remaining: "#10b981", // Green for remaining money
+    overspent: "#dc2626", // Red for overspending
   };
 
   // Calculate total income and expenses
@@ -33,37 +34,61 @@ const PieChartAnalytics = ({ transactions, monthlyBudget = 0 }) => {
     // Start with monthly budget as base income, then add income transactions
     totalIncome += monthlyBudget;
 
-    // Calculate money remaining
-    const moneyRemaining = Math.max(0, totalIncome - totalExpense);
+    // Calculate money remaining or overspent amount
+    const difference = totalIncome - totalExpense;
+    const moneyRemaining = Math.max(0, difference);
+    const overspentAmount = Math.abs(Math.min(0, difference));
 
-    // Cap expenses at total income (can't spend more than 100% in the pie)
-    const displayExpense = Math.min(totalExpense, totalIncome);
+    // If overspent, show expenses within budget + overspent amount
+    if (totalExpense > totalIncome) {
+      console.log("Pie Chart Calculation (OVERSPENT):", {
+        monthlyBudget,
+        incomeFromTransactions: totalIncome - monthlyBudget,
+        totalIncome,
+        totalExpense,
+        expenseWithinBudget: totalIncome,
+        overspentAmount,
+      });
 
-    console.log("Pie Chart Calculation:", {
-      monthlyBudget,
-      incomeFromTransactions: totalIncome - monthlyBudget,
-      totalIncome,
-      totalExpense,
-      moneyRemaining,
-      displayExpense,
-    });
+      return [
+        { name: "Spent (Within Budget)", value: totalIncome, type: "expense" },
+        { name: "Overspent", value: overspentAmount, type: "overspent" },
+      ];
+    } else {
+      // Normal case: show spent vs remaining
+      console.log("Pie Chart Calculation:", {
+        monthlyBudget,
+        incomeFromTransactions: totalIncome - monthlyBudget,
+        totalIncome,
+        totalExpense,
+        moneyRemaining,
+      });
 
-    // Pie chart shows: Expenses (spent) vs Remaining (left from 100% income)
-    return [
-      { name: "Spent", value: displayExpense, type: "expense" },
-      { name: "Remaining", value: moneyRemaining, type: "remaining" },
-    ];
+      return [
+        { name: "Spent", value: totalExpense, type: "expense" },
+        { name: "Remaining", value: moneyRemaining, type: "remaining" },
+      ];
+    }
   }, [transactions, monthlyBudget]);
 
   // Calculate totals for display
-  const totalExpense = chartData[0].value; // Spent amount
-  const moneyRemaining = chartData[1].value; // Remaining amount
-  const totalIncome = totalExpense + moneyRemaining; // Total income (100%)
+  const isOverspent =
+    chartData.length === 2 && chartData[1].type === "overspent";
+  const totalIncome = isOverspent
+    ? chartData[0].value // In overspent case, first slice is the total budget
+    : chartData[0].value + chartData[1].value; // Normal case: spent + remaining
+  const totalExpense = isOverspent
+    ? chartData[0].value + chartData[1].value // spent within budget + overspent
+    : chartData[0].value; // normal spent amount
+  const moneyRemaining = isOverspent ? 0 : chartData[1].value;
+  const overspentAmount = isOverspent ? chartData[1].value : 0;
 
   // Custom label renderer
   const renderLabel = (entry) => {
     if (totalIncome === 0) return "0%";
-    const percent = ((entry.value / totalIncome) * 100).toFixed(1);
+    // For overspent scenarios, calculate percentage of total expense
+    const base = isOverspent ? totalExpense : totalIncome;
+    const percent = ((entry.value / base) * 100).toFixed(1);
     return `${percent}%`;
   };
 
@@ -71,8 +96,8 @@ const PieChartAnalytics = ({ transactions, monthlyBudget = 0 }) => {
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const value = payload[0].value;
-      const percent =
-        totalIncome === 0 ? 0 : ((value / totalIncome) * 100).toFixed(1);
+      const base = isOverspent ? totalExpense : totalIncome;
+      const percent = base === 0 ? 0 : ((value / base) * 100).toFixed(1);
       return (
         <div className="custom-tooltip">
           <p className="tooltip-label">{payload[0].name}</p>
@@ -152,7 +177,10 @@ const PieChartAnalytics = ({ transactions, monthlyBudget = 0 }) => {
               <span>
                 Spent (
                 {totalIncome > 0
-                  ? ((totalExpense / totalIncome) * 100).toFixed(1)
+                  ? (
+                      (Math.min(totalExpense, totalIncome) / totalIncome) *
+                      100
+                    ).toFixed(1)
                   : 0}
                 %)
               </span>
@@ -162,28 +190,45 @@ const PieChartAnalytics = ({ transactions, monthlyBudget = 0 }) => {
             </span>
           </div>
 
-          <div className="summary-item balance-item">
-            <div className="summary-label">
-              <span
-                className="summary-color"
-                style={{ backgroundColor: COLORS.remaining }}
-              ></span>
-              <span>
-                Remaining (
-                {totalIncome > 0
-                  ? ((moneyRemaining / totalIncome) * 100).toFixed(1)
-                  : 0}
-                %)
+          {isOverspent ? (
+            <div className="summary-item overspent-item">
+              <div className="summary-label">
+                <span
+                  className="summary-color"
+                  style={{ backgroundColor: COLORS.overspent }}
+                ></span>
+                <span>
+                  Overspent (
+                  {totalIncome > 0
+                    ? ((overspentAmount / totalExpense) * 100).toFixed(1)
+                    : 0}
+                  %)
+                </span>
+              </div>
+              <span className="summary-value overspent-value">
+                {formatCurrency(overspentAmount)}
               </span>
             </div>
-            <span
-              className={`summary-value ${
-                moneyRemaining >= 0 ? "positive" : "negative"
-              }`}
-            >
-              {formatCurrency(moneyRemaining)}
-            </span>
-          </div>
+          ) : (
+            <div className="summary-item balance-item">
+              <div className="summary-label">
+                <span
+                  className="summary-color"
+                  style={{ backgroundColor: COLORS.remaining }}
+                ></span>
+                <span>
+                  Remaining (
+                  {totalIncome > 0
+                    ? ((moneyRemaining / totalIncome) * 100).toFixed(1)
+                    : 0}
+                  %)
+                </span>
+              </div>
+              <span className="summary-value positive">
+                {formatCurrency(moneyRemaining)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

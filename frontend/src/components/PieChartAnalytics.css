@@ -95,6 +95,12 @@
   font-weight: 600;
 }
 
+.overspent-item {
+  border-color: #dc2626;
+  background: #fee2e2;
+  font-weight: 600;
+}
+
 .summary-label {
   display: flex;
   align-items: center;
@@ -133,6 +139,10 @@
 
 .negative {
   color: #f44336;
+}
+
+.overspent-value {
+  color: #dc2626;
 }
 
 /* Responsive Design */
