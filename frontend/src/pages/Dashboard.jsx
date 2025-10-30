@@ -336,226 +336,231 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-      <div className="budget-section">
-        <h3>Monthly Budget</h3>
-        {!isEditingBudget ? (
-          <div className="budget-display">
-            <span className="budget-amount">
-              {formatCurrency(monthlyBudget)}
-            </span>
-            <button
-              onClick={() => {
-                setBudgetInput(monthlyBudget);
-                setIsEditingBudget(true);
-              }}
-              className="edit-btn"
-            >
-              Edit
-            </button>
-          </div>
-        ) : (
-          <div className="budget-edit">
-            <input
-              type="number"
-              value={budgetInput}
-              onChange={(e) => setBudgetInput(e.target.value)}
-              placeholder="Enter monthly budget"
-              min="0"
-            />
-            <button onClick={handleBudgetUpdate} className="save-btn">
-              Save
-            </button>
-            <button
-              onClick={() => setIsEditingBudget(false)}
-              className="cancel-btn"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Budget Alert */}
-      <div ref={alertRef}>
-        <BudgetAlert
-          totalIncome={summary.totalIncome + monthlyBudget}
-          totalExpense={summary.totalExpense}
-          monthlyBudget={monthlyBudget}
-        />
-      </div>
-
-      {/* Summary Cards */}
-      <div className="summary-section">
-        <div className="summary-card income">
-          <h3>Total Income</h3>
-          <p className="amount">
-            {formatCurrency(summary.totalIncome + monthlyBudget)}
-          </p>
-        </div>
-        <div
-          className={`summary-card expense ${
-            summary.totalExpense > summary.totalIncome + monthlyBudget
-              ? "danger"
-              : summary.totalExpense >=
-                (summary.totalIncome + monthlyBudget) * 0.9
-              ? "warning"
-              : ""
-          }`}
-        >
-          <h3>Total Expense</h3>
-          <p className="amount">{formatCurrency(summary.totalExpense)}</p>
-        </div>
-        <div
-          className={`summary-card balance ${
-            summary.totalIncome + monthlyBudget - summary.totalExpense < 0
-              ? "danger"
-              : ""
-          }`}
-        >
-          <h3>Net Balance</h3>
-          <p className="amount">
-            {formatCurrency(
-              summary.totalIncome + monthlyBudget - summary.totalExpense
-            )}
-          </p>
-        </div>
-      </div>
-
-      {/* Add Transaction Form */}
-      <div className="transaction-form-section">
-        <h3>Add Transaction</h3>
-        <form onSubmit={handleTransactionSubmit} className="transaction-form">
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="title">Title *</label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={transactionForm.title}
-                onChange={handleFormChange}
-                placeholder="e.g., Salary, Grocery"
-                disabled={loading}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="amount">Amount *</label>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                value={transactionForm.amount}
-                onChange={handleFormChange}
-                placeholder="0"
-                min="0.01"
-                step="0.01"
-                disabled={loading}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="type">Type *</label>
-              <select
-                id="type"
-                name="type"
-                value={transactionForm.type}
-                onChange={handleFormChange}
-                disabled={loading}
-              >
-                <option value="income">Income</option>
-                <option value="expense">Expense</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label htmlFor="category">Category</label>
-              <input
-                type="text"
-                id="category"
-                name="category"
-                value={transactionForm.category}
-                onChange={handleFormChange}
-                placeholder="e.g., Food, Transport"
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="date">Date *</label>
-              <input
-                type="date"
-                id="date"
-                name="date"
-                value={transactionForm.date}
-                onChange={handleFormChange}
-                disabled={loading}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <button type="submit" className="add-btn" disabled={loading}>
-                {loading ? "Adding..." : "Add Transaction"}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      {/* Transactions Preview */}
-      <div className="transactions-preview">
-        <h3>Recent Transactions</h3>
-        {transactions.length === 0 ? (
-          <p className="no-data">
-            No transactions yet. Add your first transaction above!
-          </p>
-        ) : (
-          <div className="transactions-list">
-            {transactions.slice(0, 5).map((transaction) => (
-              <div key={transaction._id} className="transaction-item">
-                <div className="transaction-info">
-                  <span className="transaction-title">{transaction.title}</span>
-                  <span className="transaction-category">
-                    {transaction.category}
-                  </span>
-                </div>
-                <span className={`transaction-amount ${transaction.type}`}>
-                  {transaction.type === "income" ? "+" : "-"}
-                  {formatCurrency(transaction.amount)}
+          <div className="budget-section">
+            <h3>Monthly Budget</h3>
+            {!isEditingBudget ? (
+              <div className="budget-display">
+                <span className="budget-amount">
+                  {formatCurrency(monthlyBudget)}
                 </span>
+                <button
+                  onClick={() => {
+                    setBudgetInput(monthlyBudget);
+                    setIsEditingBudget(true);
+                  }}
+                  className="edit-btn"
+                >
+                  Edit
+                </button>
               </div>
-            ))}
+            ) : (
+              <div className="budget-edit">
+                <input
+                  type="number"
+                  value={budgetInput}
+                  onChange={(e) => setBudgetInput(e.target.value)}
+                  placeholder="Enter monthly budget"
+                  min="0"
+                />
+                <button onClick={handleBudgetUpdate} className="save-btn">
+                  Save
+                </button>
+                <button
+                  onClick={() => setIsEditingBudget(false)}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Pie Chart Analytics */}
-      <div ref={pieChartRef}>
-        <PieChartAnalytics
-          transactions={transactions}
-          monthlyBudget={monthlyBudget}
-        />
-      </div>
+          {/* Budget Alert */}
+          <div ref={alertRef}>
+            <BudgetAlert
+              totalIncome={summary.totalIncome + monthlyBudget}
+              totalExpense={summary.totalExpense}
+              monthlyBudget={monthlyBudget}
+            />
+          </div>
 
-      {/* Month Navigation */}
-      <MonthNavigation
-        year={selectedYear}
-        month={selectedMonth}
-        onPrevMonth={handlePrevMonth}
-        onNextMonth={handleNextMonth}
-      />
+          {/* Summary Cards */}
+          <div className="summary-section">
+            <div className="summary-card income">
+              <h3>Total Income</h3>
+              <p className="amount">
+                {formatCurrency(summary.totalIncome + monthlyBudget)}
+              </p>
+            </div>
+            <div
+              className={`summary-card expense ${
+                summary.totalExpense > summary.totalIncome + monthlyBudget
+                  ? "danger"
+                  : summary.totalExpense >=
+                    (summary.totalIncome + monthlyBudget) * 0.9
+                  ? "warning"
+                  : ""
+              }`}
+            >
+              <h3>Total Expense</h3>
+              <p className="amount">{formatCurrency(summary.totalExpense)}</p>
+            </div>
+            <div
+              className={`summary-card balance ${
+                summary.totalIncome + monthlyBudget - summary.totalExpense < 0
+                  ? "danger"
+                  : ""
+              }`}
+            >
+              <h3>Net Balance</h3>
+              <p className="amount">
+                {formatCurrency(
+                  summary.totalIncome + monthlyBudget - summary.totalExpense
+                )}
+              </p>
+            </div>
+          </div>
 
-      {/* Full Transactions List with Edit/Delete */}
-      <TransactionsList
-        transactions={transactions}
-        onUpdate={handleUpdateTransaction}
-        onDelete={handleDeleteTransaction}
-      />
-      </>
+          {/* Add Transaction Form */}
+          <div className="transaction-form-section">
+            <h3>Add Transaction</h3>
+            <form
+              onSubmit={handleTransactionSubmit}
+              className="transaction-form"
+            >
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="title">Title *</label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={transactionForm.title}
+                    onChange={handleFormChange}
+                    placeholder="e.g., Salary, Grocery"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="amount">Amount *</label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    value={transactionForm.amount}
+                    onChange={handleFormChange}
+                    placeholder="0"
+                    min="0.01"
+                    step="0.01"
+                    disabled={loading}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="type">Type *</label>
+                  <select
+                    id="type"
+                    name="type"
+                    value={transactionForm.type}
+                    onChange={handleFormChange}
+                    disabled={loading}
+                  >
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="category">Category</label>
+                  <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    value={transactionForm.category}
+                    onChange={handleFormChange}
+                    placeholder="e.g., Food, Transport"
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="date">Date *</label>
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={transactionForm.date}
+                    onChange={handleFormChange}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <button type="submit" className="add-btn" disabled={loading}>
+                    {loading ? "Adding..." : "Add Transaction"}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Transactions Preview */}
+          <div className="transactions-preview">
+            <h3>Recent Transactions</h3>
+            {transactions.length === 0 ? (
+              <p className="no-data">
+                No transactions yet. Add your first transaction above!
+              </p>
+            ) : (
+              <div className="transactions-list">
+                {transactions.slice(0, 5).map((transaction) => (
+                  <div key={transaction._id} className="transaction-item">
+                    <div className="transaction-info">
+                      <span className="transaction-title">
+                        {transaction.title}
+                      </span>
+                      <span className="transaction-category">
+                        {transaction.category}
+                      </span>
+                    </div>
+                    <span className={`transaction-amount ${transaction.type}`}>
+                      {transaction.type === "income" ? "+" : "-"}
+                      {formatCurrency(transaction.amount)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Pie Chart Analytics */}
+          <div ref={pieChartRef}>
+            <PieChartAnalytics
+              transactions={transactions}
+              monthlyBudget={monthlyBudget}
+            />
+          </div>
+
+          {/* Month Navigation */}
+          <MonthNavigation
+            year={selectedYear}
+            month={selectedMonth}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+          />
+
+          {/* Full Transactions List with Edit/Delete */}
+          <TransactionsList
+            transactions={transactions}
+            onUpdate={handleUpdateTransaction}
+            onDelete={handleDeleteTransaction}
+          />
+        </>
       )}
     </div>
   );
