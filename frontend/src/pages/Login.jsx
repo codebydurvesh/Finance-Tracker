@@ -104,6 +104,7 @@ const Login = () => {
             callback: handleGoogleLogin,
             auto_select: false,
             cancel_on_tap_outside: true,
+            itp_support: true,
           });
 
           window.google.accounts.id.renderButton(googleButtonRef.current, {
@@ -111,6 +112,7 @@ const Login = () => {
             size: "large",
             text: "signin_with",
             width: 350,
+            shape: "rectangular",
             logo_alignment: "left",
           });
         } catch (err) {

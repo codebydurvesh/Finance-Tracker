@@ -533,9 +533,17 @@ const Dashboard = () => {
             <h1>💰 Finance Tracker</h1>
             <p>Welcome, {user?.name}!</p>
           </div>
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
+          <div className="header-right">
+            <button
+              onClick={() => navigate("/settings")}
+              className="settings-btn"
+            >
+              ⚙️ Settings
+            </button>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </div>
         </div>
       </header>
 

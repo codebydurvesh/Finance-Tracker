@@ -4,6 +4,7 @@ const {
   getUserProfile,
   updateUserProfile,
   updateBudget,
+  changePassword,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -15,5 +16,8 @@ router.route("/me").get(getUserProfile).put(updateUserProfile);
 
 // Budget route
 router.put("/budget", updateBudget);
+
+// Password route
+router.put("/password", changePassword);
 
 module.exports = router;

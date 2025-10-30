@@ -17,3 +17,9 @@ export const updateBudget = async (monthlyBudget) => {
   const response = await api.put("/users/budget", { monthlyBudget });
   return response.data;
 };
+
+// Change password
+export const changePassword = async (passwordData) => {
+  const response = await api.put("/users/password", passwordData);
+  return response.data;
+};

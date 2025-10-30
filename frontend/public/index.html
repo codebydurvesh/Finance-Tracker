@@ -9,6 +9,37 @@
       content="Track your finances with ease"
     />
     <title>Finance Tracker</title>
+    <script>
+      // Suppress Google Identity Services console warnings
+      (function() {
+        const originalWarn = console.warn;
+        console.warn = function(...args) {
+          const message = args[0];
+          if (
+            typeof message === 'string' && 
+            (message.includes('GSI_LOGGER') || 
+             message.includes('button width') ||
+             message.includes('credential button'))
+          ) {
+            return;
+          }
+          originalWarn.apply(console, args);
+        };
+
+        const originalError = console.error;
+        console.error = function(...args) {
+          const message = args[0];
+          if (
+            typeof message === 'string' && 
+            (message.includes('GSI_LOGGER') ||
+             message.includes('Failed to load resource') && message.includes('accounts.google.com'))
+          ) {
+            return;
+          }
+          originalError.apply(console, args);
+        };
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
