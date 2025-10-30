@@ -12,6 +12,7 @@ import { updateBudget, getUserProfile } from "../services/userService";
 import { formatCurrency } from "../utils/helpers";
 import TransactionsList from "../components/TransactionsList";
 import PieChartAnalytics from "../components/PieChartAnalytics";
+import BudgetAlert from "../components/BudgetAlert";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -267,6 +268,13 @@ const Dashboard = () => {
         )}
       </div>
 
+      {/* Budget Alert */}
+      <BudgetAlert
+        totalIncome={summary.totalIncome + monthlyBudget}
+        totalExpense={summary.totalExpense}
+        monthlyBudget={monthlyBudget}
+      />
+
       {/* Summary Cards */}
       <div className="summary-section">
         <div className="summary-card income">
@@ -275,11 +283,25 @@ const Dashboard = () => {
             {formatCurrency(summary.totalIncome + monthlyBudget)}
           </p>
         </div>
-        <div className="summary-card expense">
+        <div
+          className={`summary-card expense ${
+            summary.totalExpense > summary.totalIncome + monthlyBudget
+              ? "danger"
+              : summary.totalExpense >= (summary.totalIncome + monthlyBudget) * 0.9
+              ? "warning"
+              : ""
+          }`}
+        >
           <h3>Total Expense</h3>
           <p className="amount">{formatCurrency(summary.totalExpense)}</p>
         </div>
-        <div className="summary-card balance">
+        <div
+          className={`summary-card balance ${
+            summary.totalIncome + monthlyBudget - summary.totalExpense < 0
+              ? "danger"
+              : ""
+          }`}
+        >
           <h3>Net Balance</h3>
           <p className="amount">
             {formatCurrency(
