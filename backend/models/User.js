@@ -20,9 +20,21 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Please add a password"],
+      required: function () {
+        // Password is not required if user signs in with Google
+        return !this.googleId;
+      },
       minlength: 6,
       select: false, // Don't include password in queries by default
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows null values to be non-unique
+    },
+    profilePicture: {
+      type: String,
+      default: "",
     },
     monthlyBudget: {
       type: Number,
@@ -34,8 +46,5 @@ const userSchema = new mongoose.Schema(
     timestamps: true, // Adds createdAt and updatedAt fields
   }
 );
-
-// Index for faster email lookups
-userSchema.index({ email: 1 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -5,6 +5,18 @@ const connectDB = require("./config/db");
 
 const app = express();
 
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (err) => {
+  console.error("❌ Unhandled Promise Rejection:", err);
+  console.error("Stack:", err.stack);
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+  console.error("Stack:", err.stack);
+});
+
 // Connect to MongoDB
 connectDB();
 
