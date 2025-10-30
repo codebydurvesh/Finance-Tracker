@@ -36,7 +36,9 @@ const Dashboard = () => {
   // Month selection state (default to current month)
   const currentDate = new Date();
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1); // 1-12
+  const [selectedMonth, setSelectedMonth] = useState(
+    currentDate.getMonth() + 1
+  ); // 1-12
 
   const [transactionForm, setTransactionForm] = useState({
     title: "",
