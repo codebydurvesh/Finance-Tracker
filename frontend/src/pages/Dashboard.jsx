@@ -236,6 +236,11 @@ const Dashboard = () => {
       return;
     }
 
+    if (!Number.isInteger(amount)) {
+      toast.error("Amount must be a whole number (no decimals)");
+      return;
+    }
+
     if (amount <= 0) {
       toast.error("Amount must be greater than 0");
       return;
@@ -678,8 +683,8 @@ const Dashboard = () => {
                     value={transactionForm.amount}
                     onChange={handleFormChange}
                     placeholder="0"
-                    min="0.01"
-                    step="0.01"
+                    min="1"
+                    step="1"
                     disabled={loading}
                     required
                   />
