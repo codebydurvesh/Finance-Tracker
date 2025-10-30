@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "../context/AuthContext";
 import {
   getTransactions,
@@ -48,14 +50,14 @@ const Dashboard = () => {
     date: new Date().toISOString().split("T")[0],
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [dataLoading, setDataLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, [selectedYear, selectedMonth]); // Refetch when month changes
 
   const fetchData = async () => {
+    setDataLoading(true);
     try {
       const [transactionsData, summaryData, userProfile] = await Promise.all([
         getTransactionsByMonth(selectedYear, selectedMonth),
@@ -77,8 +79,10 @@ const Dashboard = () => {
         updateUser(userProfile);
       }
     } catch (err) {
-      setError("Failed to load data");
+      toast.error("Failed to load data");
       console.error(err);
+    } finally {
+      setDataLoading(false);
     }
   };
 
@@ -116,7 +120,7 @@ const Dashboard = () => {
 
   const handleBudgetUpdate = async () => {
     if (!budgetInput || isNaN(budgetInput) || Number(budgetInput) < 0) {
-      setError("Please enter a valid budget amount");
+      toast.error("Please enter a valid budget amount");
       return;
     }
 
@@ -125,25 +129,46 @@ const Dashboard = () => {
       setMonthlyBudget(updatedUser.monthlyBudget);
       updateUser(updatedUser);
       setIsEditingBudget(false);
-      setSuccess("Budget updated successfully!");
-      setTimeout(() => setSuccess(""), 3000);
+      toast.success("Budget updated successfully!");
     } catch (err) {
-      setError("Failed to update budget");
+      toast.error("Failed to update budget");
       console.error(err);
     }
   };
 
   const handleTransactionSubmit = async (e) => {
     e.preventDefault();
-    setError("");
 
     if (!transactionForm.title || !transactionForm.amount) {
-      setError("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
 
-    if (Number(transactionForm.amount) <= 0) {
-      setError("Amount must be greater than 0");
+    const amount = Number(transactionForm.amount);
+
+    // Enhanced validation
+    if (isNaN(amount)) {
+      toast.error("Please enter a valid number for amount");
+      return;
+    }
+
+    if (amount <= 0) {
+      toast.error("Amount must be greater than 0");
+      return;
+    }
+
+    if (amount > 1000000000) {
+      toast.error("Amount is too large. Please enter a reasonable value");
+      return;
+    }
+
+    if (transactionForm.title.trim().length < 2) {
+      toast.error("Title must be at least 2 characters long");
+      return;
+    }
+
+    if (transactionForm.title.length > 100) {
+      toast.error("Title is too long. Please keep it under 100 characters");
       return;
     }
 
@@ -152,7 +177,7 @@ const Dashboard = () => {
     try {
       const newTransaction = await createTransaction({
         ...transactionForm,
-        amount: Number(transactionForm.amount),
+        amount: amount,
       });
 
       setTransactions([newTransaction, ...transactions]);
@@ -181,8 +206,7 @@ const Dashboard = () => {
         date: new Date().toISOString().split("T")[0],
       });
 
-      setSuccess("Transaction added successfully!");
-      setTimeout(() => setSuccess(""), 3000);
+      toast.success("Transaction added successfully!");
 
       // Calculate if budget is exceeded after this transaction
       const updatedTotalIncome =
@@ -209,7 +233,7 @@ const Dashboard = () => {
         }
       }, 100);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to add transaction");
+      toast.error(err.response?.data?.message || "Failed to add transaction");
     } finally {
       setLoading(false);
     }
@@ -239,10 +263,11 @@ const Dashboard = () => {
       // Recalculate summary
       await fetchSummary();
 
-      setSuccess("Transaction updated successfully!");
-      setTimeout(() => setSuccess(""), 3000);
+      toast.success("Transaction updated successfully!");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update transaction");
+      toast.error(
+        err.response?.data?.message || "Failed to update transaction"
+      );
       throw err;
     }
   };
@@ -257,10 +282,11 @@ const Dashboard = () => {
       // Recalculate summary
       await fetchSummary();
 
-      setSuccess("Transaction deleted successfully!");
-      setTimeout(() => setSuccess(""), 3000);
+      toast.success("Transaction deleted successfully!");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete transaction");
+      toast.error(
+        err.response?.data?.message || "Failed to delete transaction"
+      );
       throw err;
     }
   };
@@ -289,11 +315,27 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* Messages */}
-      {error && <div className="message error-message">{error}</div>}
-      {success && <div className="message success-message">{success}</div>}
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
 
-      {/* Budget Section */}
+      {dataLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading your data...</p>
+        </div>
+      ) : (
+        <>
       <div className="budget-section">
         <h3>Monthly Budget</h3>
         {!isEditingBudget ? (
@@ -513,6 +555,8 @@ const Dashboard = () => {
         onUpdate={handleUpdateTransaction}
         onDelete={handleDeleteTransaction}
       />
+      </>
+      )}
     </div>
   );
 };
