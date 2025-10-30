@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import {
   getTransactions,
   getTransactionsByMonth,
-  getTransactionSummary,
   createTransaction,
   updateTransaction,
   deleteTransaction,
@@ -47,7 +46,7 @@ const Dashboard = () => {
     amount: "",
     type: "expense",
     category: "Other",
-    date: new Date().toISOString().split("T")[0],
+    day: new Date().getDate(), // Just store the day
   });
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -56,22 +55,53 @@ const Dashboard = () => {
     fetchData();
   }, [selectedYear, selectedMonth]); // Refetch when month changes
 
+  // Update form day when month changes to default to current day or 1st
+  useEffect(() => {
+    const today = new Date();
+    const isCurrentMonth =
+      selectedYear === today.getFullYear() &&
+      selectedMonth === today.getMonth() + 1;
+
+    // If viewing current month, default to today's day, otherwise 1st day
+    const defaultDay = isCurrentMonth ? today.getDate() : 1;
+
+    setTransactionForm((prev) => ({
+      ...prev,
+      day: defaultDay,
+    }));
+  }, [selectedYear, selectedMonth]);
+
   const fetchData = async () => {
     setDataLoading(true);
     try {
-      const [transactionsData, summaryData, userProfile] = await Promise.all([
+      const [transactionsData, userProfile] = await Promise.all([
         getTransactionsByMonth(selectedYear, selectedMonth),
-        getTransactionSummary(),
         getUserProfile(),
       ]);
 
-      // Sort transactions by date (newest first)
+      // Sort transactions by createdAt timestamp (newest first) to show most recent transactions on top
       const sortedTransactions = transactionsData.sort((a, b) => {
-        return new Date(b.date) - new Date(a.date);
+        return new Date(b.createdAt) - new Date(a.createdAt);
       });
 
       setTransactions(sortedTransactions);
-      setSummary(summaryData);
+
+      // Calculate summary based on the selected month's transactions
+      const monthSummary = sortedTransactions.reduce(
+        (acc, transaction) => {
+          if (transaction.type === "income") {
+            acc.totalIncome += transaction.amount;
+            acc.netBalance += transaction.amount;
+          } else {
+            acc.totalExpense += transaction.amount;
+            acc.netBalance -= transaction.amount;
+          }
+          return acc;
+        },
+        { totalIncome: 0, totalExpense: 0, netBalance: 0 }
+      );
+
+      setSummary(monthSummary);
 
       // Update monthly budget from server
       if (userProfile && userProfile.monthlyBudget !== undefined) {
@@ -89,6 +119,25 @@ const Dashboard = () => {
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  // Helper function to get month name
+  const getMonthName = (month) => {
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return monthNames[month - 1];
   };
 
   const handlePrevMonth = () => {
@@ -139,12 +188,17 @@ const Dashboard = () => {
   const handleTransactionSubmit = async (e) => {
     e.preventDefault();
 
-    if (!transactionForm.title || !transactionForm.amount) {
+    if (
+      !transactionForm.title ||
+      !transactionForm.amount ||
+      !transactionForm.day
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     const amount = Number(transactionForm.amount);
+    const day = Number(transactionForm.day);
 
     // Enhanced validation
     if (isNaN(amount)) {
@@ -172,66 +226,115 @@ const Dashboard = () => {
       return;
     }
 
+    // Validate day
+    if (isNaN(day) || day < 1 || day > 31) {
+      toast.error("Please enter a valid day (1-31)");
+      return;
+    }
+
+    // Check if day is valid for the selected month
+    const daysInMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+    if (day > daysInMonth) {
+      toast.error(
+        `${getMonthName(
+          selectedMonth
+        )} ${selectedYear} only has ${daysInMonth} days`
+      );
+      return;
+    }
+
+    // Construct the date string directly to avoid timezone issues
+    // Format: YYYY-MM-DD
+    const paddedMonth = String(selectedMonth).padStart(2, "0");
+    const paddedDay = String(day).padStart(2, "0");
+    const dateString = `${selectedYear}-${paddedMonth}-${paddedDay}`;
+
     setLoading(true);
 
     try {
       const newTransaction = await createTransaction({
-        ...transactionForm,
+        title: transactionForm.title,
         amount: amount,
+        type: transactionForm.type,
+        category: transactionForm.category,
+        date: dateString,
       });
 
-      setTransactions([newTransaction, ...transactions]);
+      // Check if the new transaction belongs to the currently selected month
+      const transactionDate = new Date(newTransaction.date);
+      const transactionYear = transactionDate.getFullYear();
+      const transactionMonth = transactionDate.getMonth() + 1;
 
-      // Update summary
-      if (transactionForm.type === "income") {
-        setSummary({
-          ...summary,
-          totalIncome: summary.totalIncome + newTransaction.amount,
-          netBalance: summary.netBalance + newTransaction.amount,
-        });
-      } else {
-        setSummary({
-          ...summary,
-          totalExpense: summary.totalExpense + newTransaction.amount,
-          netBalance: summary.netBalance - newTransaction.amount,
-        });
+      // Only update local state if transaction is in the selected month
+      if (
+        transactionYear === selectedYear &&
+        transactionMonth === selectedMonth
+      ) {
+        setTransactions([newTransaction, ...transactions]);
+
+        // Update summary
+        if (transactionForm.type === "income") {
+          setSummary({
+            ...summary,
+            totalIncome: summary.totalIncome + newTransaction.amount,
+            netBalance: summary.netBalance + newTransaction.amount,
+          });
+        } else {
+          setSummary({
+            ...summary,
+            totalExpense: summary.totalExpense + newTransaction.amount,
+            netBalance: summary.netBalance - newTransaction.amount,
+          });
+        }
       }
 
-      // Reset form
+      // Reset form (use today's day if current month, otherwise first day of selected month)
+      const today = new Date();
+      const isCurrentMonth =
+        selectedYear === today.getFullYear() &&
+        selectedMonth === today.getMonth() + 1;
+      const defaultDay = isCurrentMonth ? today.getDate() : 1;
+
       setTransactionForm({
         title: "",
         amount: "",
         type: "expense",
         category: "Other",
-        date: new Date().toISOString().split("T")[0],
+        day: defaultDay,
       });
 
       toast.success("Transaction added successfully!");
 
-      // Calculate if budget is exceeded after this transaction
-      const updatedTotalIncome =
-        summary.totalIncome +
-        monthlyBudget +
-        (transactionForm.type === "income" ? newTransaction.amount : 0);
-      const updatedTotalExpense =
-        summary.totalExpense +
-        (transactionForm.type === "expense" ? newTransaction.amount : 0);
-      const isBudgetExceeded = updatedTotalExpense > updatedTotalIncome;
+      // Only scroll to pie chart if transaction is in current month view
+      if (
+        transactionYear === selectedYear &&
+        transactionMonth === selectedMonth
+      ) {
+        // Calculate if budget is exceeded after this transaction
+        const updatedTotalIncome =
+          summary.totalIncome +
+          monthlyBudget +
+          (transactionForm.type === "income" ? newTransaction.amount : 0);
+        const updatedTotalExpense =
+          summary.totalExpense +
+          (transactionForm.type === "expense" ? newTransaction.amount : 0);
+        const isBudgetExceeded = updatedTotalExpense > updatedTotalIncome;
 
-      // Scroll to top if budget exceeded, otherwise scroll to pie chart
-      setTimeout(() => {
-        if (isBudgetExceeded) {
-          window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-          });
-        } else if (pieChartRef.current) {
-          pieChartRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-      }, 100);
+        // Scroll to top if budget exceeded, otherwise scroll to pie chart
+        setTimeout(() => {
+          if (isBudgetExceeded) {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+          } else if (pieChartRef.current) {
+            pieChartRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        }, 100);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add transaction");
     } finally {
@@ -250,18 +353,60 @@ const Dashboard = () => {
     try {
       const updatedTransaction = await updateTransaction(id, updatedData);
 
-      // Update transactions list and re-sort
-      const updatedList = transactions.map((t) =>
-        t._id === id ? updatedTransaction : t
-      );
-      const sortedList = updatedList.sort((a, b) => {
-        return new Date(b.date) - new Date(a.date);
-      });
+      // Check if updated transaction still belongs to the selected month
+      const transactionDate = new Date(updatedTransaction.date);
+      const transactionYear = transactionDate.getFullYear();
+      const transactionMonth = transactionDate.getMonth() + 1;
 
-      setTransactions(sortedList);
+      if (
+        transactionYear === selectedYear &&
+        transactionMonth === selectedMonth
+      ) {
+        // Update transactions list and re-sort by createdAt (newest first)
+        const updatedList = transactions.map((t) =>
+          t._id === id ? updatedTransaction : t
+        );
+        const sortedList = updatedList.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        setTransactions(sortedList);
 
-      // Recalculate summary
-      await fetchSummary();
+        // Recalculate summary from updated transactions
+        const monthSummary = sortedList.reduce(
+          (acc, transaction) => {
+            if (transaction.type === "income") {
+              acc.totalIncome += transaction.amount;
+              acc.netBalance += transaction.amount;
+            } else {
+              acc.totalExpense += transaction.amount;
+              acc.netBalance -= transaction.amount;
+            }
+            return acc;
+          },
+          { totalIncome: 0, totalExpense: 0, netBalance: 0 }
+        );
+        setSummary(monthSummary);
+      } else {
+        // Transaction moved to different month, remove from current view
+        setTransactions(transactions.filter((t) => t._id !== id));
+
+        // Recalculate summary without this transaction
+        const filteredList = transactions.filter((t) => t._id !== id);
+        const monthSummary = filteredList.reduce(
+          (acc, transaction) => {
+            if (transaction.type === "income") {
+              acc.totalIncome += transaction.amount;
+              acc.netBalance += transaction.amount;
+            } else {
+              acc.totalExpense += transaction.amount;
+              acc.netBalance -= transaction.amount;
+            }
+            return acc;
+          },
+          { totalIncome: 0, totalExpense: 0, netBalance: 0 }
+        );
+        setSummary(monthSummary);
+      }
 
       toast.success("Transaction updated successfully!");
     } catch (err) {
@@ -277,10 +422,24 @@ const Dashboard = () => {
       await deleteTransaction(id);
 
       // Remove from transactions list
-      setTransactions(transactions.filter((t) => t._id !== id));
+      const filteredList = transactions.filter((t) => t._id !== id);
+      setTransactions(filteredList);
 
-      // Recalculate summary
-      await fetchSummary();
+      // Recalculate summary from remaining transactions
+      const monthSummary = filteredList.reduce(
+        (acc, transaction) => {
+          if (transaction.type === "income") {
+            acc.totalIncome += transaction.amount;
+            acc.netBalance += transaction.amount;
+          } else {
+            acc.totalExpense += transaction.amount;
+            acc.netBalance -= transaction.amount;
+          }
+          return acc;
+        },
+        { totalIncome: 0, totalExpense: 0, netBalance: 0 }
+      );
+      setSummary(monthSummary);
 
       toast.success("Transaction deleted successfully!");
     } catch (err) {
@@ -288,15 +447,6 @@ const Dashboard = () => {
         err.response?.data?.message || "Failed to delete transaction"
       );
       throw err;
-    }
-  };
-
-  const fetchSummary = async () => {
-    try {
-      const summaryData = await getTransactionSummary();
-      setSummary(summaryData);
-    } catch (err) {
-      console.error("Failed to fetch summary:", err);
     }
   };
 
@@ -374,6 +524,14 @@ const Dashboard = () => {
               </div>
             )}
           </div>
+
+          {/* Month Navigation */}
+          <MonthNavigation
+            year={selectedYear}
+            month={selectedMonth}
+            onPrevMonth={handlePrevMonth}
+            onNextMonth={handleNextMonth}
+          />
 
           {/* Budget Alert */}
           <div ref={alertRef}>
@@ -489,13 +647,18 @@ const Dashboard = () => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label htmlFor="date">Date *</label>
+                  <label htmlFor="day">
+                    Date * ({getMonthName(selectedMonth)} {selectedYear})
+                  </label>
                   <input
-                    type="date"
-                    id="date"
-                    name="date"
-                    value={transactionForm.date}
+                    type="number"
+                    id="day"
+                    name="day"
+                    value={transactionForm.day}
                     onChange={handleFormChange}
+                    placeholder="Day (1-31)"
+                    min="1"
+                    max={new Date(selectedYear, selectedMonth, 0).getDate()}
                     disabled={loading}
                     required
                   />
@@ -509,34 +672,39 @@ const Dashboard = () => {
             </form>
           </div>
 
-          {/* Transactions Preview */}
-          <div className="transactions-preview">
-            <h3>Recent Transactions</h3>
-            {transactions.length === 0 ? (
-              <p className="no-data">
-                No transactions yet. Add your first transaction above!
-              </p>
-            ) : (
-              <div className="transactions-list">
-                {transactions.slice(0, 5).map((transaction) => (
-                  <div key={transaction._id} className="transaction-item">
-                    <div className="transaction-info">
-                      <span className="transaction-title">
-                        {transaction.title}
-                      </span>
-                      <span className="transaction-category">
-                        {transaction.category}
-                      </span>
-                    </div>
-                    <span className={`transaction-amount ${transaction.type}`}>
-                      {transaction.type === "income" ? "+" : "-"}
-                      {formatCurrency(transaction.amount)}
-                    </span>
+          {/* Transactions Preview - Only show for current month */}
+          {selectedYear === currentDate.getFullYear() &&
+            selectedMonth === currentDate.getMonth() + 1 && (
+              <div className="transactions-preview">
+                <h3>Recent Transactions</h3>
+                {transactions.length === 0 ? (
+                  <p className="no-data">
+                    No transactions yet. Add your first transaction above!
+                  </p>
+                ) : (
+                  <div className="transactions-list">
+                    {transactions.slice(0, 5).map((transaction) => (
+                      <div key={transaction._id} className="transaction-item">
+                        <div className="transaction-info">
+                          <span className="transaction-title">
+                            {transaction.title}
+                          </span>
+                          <span className="transaction-category">
+                            {transaction.category}
+                          </span>
+                        </div>
+                        <span
+                          className={`transaction-amount ${transaction.type}`}
+                        >
+                          {transaction.type === "income" ? "+" : "-"}
+                          {formatCurrency(transaction.amount)}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
 
           {/* Pie Chart Analytics */}
           <div ref={pieChartRef}>
@@ -545,14 +713,6 @@ const Dashboard = () => {
               monthlyBudget={monthlyBudget}
             />
           </div>
-
-          {/* Month Navigation */}
-          <MonthNavigation
-            year={selectedYear}
-            month={selectedMonth}
-            onPrevMonth={handlePrevMonth}
-            onNextMonth={handleNextMonth}
-          />
 
           {/* Full Transactions List with Edit/Delete */}
           <TransactionsList

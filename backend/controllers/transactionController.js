@@ -6,7 +6,7 @@ const Transaction = require("../models/Transaction");
 const getTransactions = async (req, res) => {
   try {
     const transactions = await Transaction.find({ user: req.user.id }).sort({
-      date: -1,
+      createdAt: -1,
     });
     res.json(transactions);
   } catch (error) {
@@ -31,7 +31,7 @@ const getTransactionsByMonth = async (req, res) => {
         $gte: startDate,
         $lte: endDate,
       },
-    }).sort({ date: -1 });
+    }).sort({ createdAt: -1 });
 
     res.json(transactions);
   } catch (error) {
