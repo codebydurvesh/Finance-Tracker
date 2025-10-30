@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   getTransactions,
+  getTransactionsByMonth,
   getTransactionSummary,
   createTransaction,
   updateTransaction,
@@ -13,6 +14,7 @@ import { formatCurrency } from "../utils/helpers";
 import TransactionsList from "../components/TransactionsList";
 import PieChartAnalytics from "../components/PieChartAnalytics";
 import BudgetAlert from "../components/BudgetAlert";
+import MonthNavigation from "../components/MonthNavigation";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -31,6 +33,11 @@ const Dashboard = () => {
   const [budgetInput, setBudgetInput] = useState("");
   const [isEditingBudget, setIsEditingBudget] = useState(false);
 
+  // Month selection state (default to current month)
+  const currentDate = new Date();
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1); // 1-12
+
   const [transactionForm, setTransactionForm] = useState({
     title: "",
     amount: "",
@@ -44,12 +51,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [selectedYear, selectedMonth]); // Refetch when month changes
 
   const fetchData = async () => {
     try {
       const [transactionsData, summaryData, userProfile] = await Promise.all([
-        getTransactions(),
+        getTransactionsByMonth(selectedYear, selectedMonth),
         getTransactionSummary(),
         getUserProfile(),
       ]);
@@ -76,6 +83,33 @@ const Dashboard = () => {
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 1) {
+      setSelectedMonth(12);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1;
+
+    // Don't allow navigating beyond current month
+    if (selectedYear === currentYear && selectedMonth === currentMonth) {
+      return;
+    }
+
+    if (selectedMonth === 12) {
+      setSelectedMonth(1);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
   };
 
   const handleBudgetUpdate = async () => {
@@ -462,6 +496,14 @@ const Dashboard = () => {
           monthlyBudget={monthlyBudget}
         />
       </div>
+
+      {/* Month Navigation */}
+      <MonthNavigation
+        year={selectedYear}
+        month={selectedMonth}
+        onPrevMonth={handlePrevMonth}
+        onNextMonth={handleNextMonth}
+      />
 
       {/* Full Transactions List with Edit/Delete */}
       <TransactionsList
