@@ -52,7 +52,7 @@ const createTransporter = () => {
         },
       };
 
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     ...config,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
