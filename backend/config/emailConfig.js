@@ -3,7 +3,9 @@ let nodemailer;
 try {
   nodemailer = require("nodemailer");
   if (!nodemailer || typeof nodemailer.createTransport !== "function") {
-    console.error("❌ nodemailer imported but createTransport is not a function");
+    console.error(
+      "❌ nodemailer imported but createTransport is not a function"
+    );
     console.error("Trying default import...");
     nodemailer = require("nodemailer").default || require("nodemailer");
   }
@@ -15,7 +17,9 @@ try {
 // Create reusable transporter
 const createTransporter = () => {
   if (!nodemailer || typeof nodemailer.createTransport !== "function") {
-    throw new Error("nodemailer.createTransport is not available. Please reinstall nodemailer.");
+    throw new Error(
+      "nodemailer.createTransport is not available. Please reinstall nodemailer."
+    );
   }
   // Use custom SMTP settings if provided, otherwise use Gmail
   const config = process.env.EMAIL_HOST
