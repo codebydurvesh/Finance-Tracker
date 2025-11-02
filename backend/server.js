@@ -20,6 +20,13 @@ process.on("uncaughtException", (err) => {
 // Connect to MongoDB
 connectDB();
 
+// Verify email configuration on startup
+const { verifyEmailConfig } = require("./config/emailConfig");
+verifyEmailConfig().catch((err) => {
+  console.error("⚠️ Email configuration warning:", err.message);
+  console.log("🔧 OTP emails may not work. Check EMAIL_USER and EMAIL_PASSWORD env variables.");
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -32,6 +39,33 @@ app.get("/", (req, res) => {
     status: "Server is running",
     version: "1.0.0",
   });
+});
+
+// Health check endpoint with email status
+app.get("/api/health", async (req, res) => {
+  try {
+    const { verifyEmailConfig } = require("./config/emailConfig");
+    const emailReady = await verifyEmailConfig();
+    
+    res.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      services: {
+        api: "online",
+        email: emailReady ? "ready" : "not configured",
+      },
+      environment: {
+        nodeEnv: process.env.NODE_ENV,
+        emailUser: process.env.EMAIL_USER ? "configured" : "missing",
+        emailPassword: process.env.EMAIL_PASSWORD ? "configured" : "missing",
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "unhealthy",
+      error: error.message,
+    });
+  }
 });
 
 // API routes
