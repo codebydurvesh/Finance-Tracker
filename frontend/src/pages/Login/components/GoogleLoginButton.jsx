@@ -23,10 +23,10 @@ const GoogleLoginButton = ({ onGoogleLogin }) => {
     };
 
     updateButtonWidth();
-    window.addEventListener('resize', updateButtonWidth);
+    window.addEventListener("resize", updateButtonWidth);
 
     return () => {
-      window.removeEventListener('resize', updateButtonWidth);
+      window.removeEventListener("resize", updateButtonWidth);
     };
   }, []);
 
