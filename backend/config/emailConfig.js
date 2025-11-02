@@ -3,11 +3,19 @@ const nodemailer = require("nodemailer");
 // Create reusable transporter
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE || "gmail",
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, // Use TLS
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASSWORD,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
   });
 };
 
