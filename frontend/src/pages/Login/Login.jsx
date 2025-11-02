@@ -5,6 +5,7 @@ import { login as loginService } from "../../services/authService";
 import { isValidEmail } from "../../utils/helpers";
 import LoginForm from "./components/LoginForm";
 import GoogleLoginButton from "./components/GoogleLoginButton";
+import Footer from "../../components/Footer/Footer";
 import "./Login.css";
 
 const Login = () => {
@@ -98,6 +99,8 @@ const Login = () => {
           </Link>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

@@ -2,6 +2,8 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .dashboard-header {
@@ -54,18 +56,20 @@
 }
 
 .logout-btn {
-  padding: 10px 24px;
+  padding: 12px 36px;
   background: #f44336;
   color: white;
   border: none;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s;
+  font-size: 0.95rem;
 }
 
 .logout-btn:hover {
   background: #d32f2f;
+  transform: translateY(-2px);
 }
 
 /* Messages */

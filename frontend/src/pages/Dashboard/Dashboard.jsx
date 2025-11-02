@@ -19,6 +19,7 @@ import BudgetSection from "./components/BudgetSection";
 import SummaryCards from "./components/SummaryCards";
 import TransactionForm from "./components/TransactionForm";
 import TransactionsPreview from "./components/TransactionsPreview";
+import Footer from "../../components/Footer/Footer";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -406,6 +407,8 @@ const Dashboard = () => {
           />
         </>
       )}
+
+      <Footer />
     </div>
   );
 };
