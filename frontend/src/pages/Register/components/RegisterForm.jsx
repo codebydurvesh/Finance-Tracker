@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { isValidPassword } from "../../../utils/helpers";
+import { isValidPassword, isValidEmail } from "../../../utils/helpers";
 
-const RegisterForm = ({ onSubmit, loading, verifiedEmail }) => {
+const RegisterForm = ({ onSubmit, loading }) => {
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -20,7 +21,12 @@ const RegisterForm = ({ onSubmit, loading, verifiedEmail }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.password || !formData.confirmPassword) {
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
       return { success: false, message: "Please fill in all fields" };
     }
 
@@ -29,6 +35,10 @@ const RegisterForm = ({ onSubmit, loading, verifiedEmail }) => {
         success: false,
         message: "Name must be at least 2 characters long",
       };
+    }
+
+    if (!isValidEmail(formData.email)) {
+      return { success: false, message: "Please enter a valid email address" };
     }
 
     if (!isValidPassword(formData.password)) {
@@ -48,11 +58,9 @@ const RegisterForm = ({ onSubmit, loading, verifiedEmail }) => {
   return (
     <div className="register-form-step">
       <div className="step-header">
-        <div className="step-icon">✅</div>
+        <div className="step-icon">📝</div>
         <h2>Complete Your Registration</h2>
-        <p className="verified-email">
-          <span className="check-icon">✓</span> {verifiedEmail}
-        </p>
+        <p className="step-description">Create your account to get started</p>
       </div>
 
       <form onSubmit={handleSubmit} className="auth-form">
@@ -67,6 +75,19 @@ const RegisterForm = ({ onSubmit, loading, verifiedEmail }) => {
             placeholder="Enter your full name"
             disabled={loading}
             autoFocus
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="your.email@example.com"
+            disabled={loading}
           />
         </div>
 

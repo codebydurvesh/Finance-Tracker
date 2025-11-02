@@ -28,31 +28,6 @@ process.on("uncaughtException", (err) => {
 // Connect to MongoDB
 connectDB();
 
-// Email verification is now done on-demand when OTP is sent
-// Commenting out startup verification to avoid blocking server startup
-/*
-if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
-  const { verifyEmailConfig } = require("./config/emailConfig");
-  verifyEmailConfig().catch((err) => {
-    console.error("⚠️ Email configuration warning:", err.message);
-    console.log(
-      "🔧 OTP emails may not work. Check EMAIL_USER and EMAIL_PASSWORD env variables."
-    );
-  });
-} else {
-  console.log(
-    "⚠️ Email credentials not found. OTP functionality will be disabled."
-  );
-  console.log(
-    "💡 Set EMAIL_USER and EMAIL_PASSWORD environment variables to enable emails."
-  );
-}
-*/
-
-console.log(
-  "📧 Email service configured. Brevo SMTP will be used for OTP emails."
-);
-
 // Middleware
 app.use(cors());
 app.use(express.json());

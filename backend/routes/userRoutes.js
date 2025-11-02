@@ -5,10 +5,8 @@ const {
   updateUserProfile,
   updateBudget,
   changePassword,
-  sendEmailChangeOTP,
-  verifyEmailChangeOTP,
-  sendAccountDeletionOTP,
-  verifyAndDeleteAccount,
+  changeEmail,
+  deleteAccount,
 } = require("../controllers/userController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -24,12 +22,10 @@ router.put("/budget", updateBudget);
 // Password route
 router.put("/password", changePassword);
 
-// Email change routes (with OTP verification)
-router.post("/change-email/send-otp", sendEmailChangeOTP);
-router.post("/change-email/verify-otp", verifyEmailChangeOTP);
+// Email change route (with password confirmation)
+router.put("/change-email", changeEmail);
 
-// Account deletion routes (with OTP verification)
-router.post("/delete-account/send-otp", sendAccountDeletionOTP);
-router.post("/delete-account/verify-otp", verifyAndDeleteAccount);
+// Account deletion route (with password confirmation)
+router.delete("/delete-account", deleteAccount);
 
 module.exports = router;
