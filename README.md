@@ -381,14 +381,6 @@ This project is open for contributions! Here's how you can help:
 - Special thanks to the open-source community
 - Icons and design inspiration from modern finance apps
 
-## 📸 Screenshots
-
-![Login page png](image.png)
-![Registeration page png](image-1.png)
-![Dashboard page png 1](image-2.png)
-![Dashboard page png 2](image-3.png)
-![Setting page png](image-4.png)
-
 ## 🔮 Future Enhancements
 
 - [ ] Mobile app (React Native)
