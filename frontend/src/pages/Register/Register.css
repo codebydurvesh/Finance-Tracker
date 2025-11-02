@@ -1,8 +1,7 @@
 .auth-container {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
 }
@@ -12,8 +11,9 @@
   padding: 40px;
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 450px;
+  max-width: 500px;
   width: 100%;
+  margin: auto;
 }
 
 .auth-header {
@@ -157,4 +157,198 @@
 
 .auth-link strong {
   font-weight: 600;
+}
+
+/* Progress Steps */
+.progress-steps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.progress-steps .step {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #999;
+  font-size: 14px;
+}
+
+.progress-steps .step.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.progress-steps .step-line {
+  width: 40px;
+  height: 2px;
+  background: #e0e0e0;
+}
+
+/* Step Components */
+.step-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.step-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.step-header h2 {
+  margin: 10px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.step-header p {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 5px 0;
+}
+
+.verified-email {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 10px 15px;
+  border-radius: 8px;
+  display: inline-block;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.verified-email .check-icon {
+  color: #4caf50;
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.step-footer {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.info-text {
+  background: #f5f7ff;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  text-align: left;
+}
+
+/* OTP Input */
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.otp-input {
+  width: 45px;
+  height: 55px;
+  font-size: 24px;
+  text-align: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s;
+  font-weight: 600;
+  color: #333;
+}
+
+.otp-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.otp-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.otp-info {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.time-left {
+  color: #667eea;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.time-expired {
+  color: #f44336;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Resend Section */
+.resend-section {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.resend-btn:hover:not(:disabled) {
+  color: #764ba2;
+}
+
+.resend-btn:disabled {
+  color: #999;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 30px 20px;
+  }
+
+  .otp-input {
+    width: 40px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .otp-input-container {
+    gap: 8px;
+  }
+
+  .step-icon {
+    font-size: 2.5rem;
+  }
+
+  .progress-steps .step {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .progress-steps .step-line {
+    width: 30px;
+  }
 }

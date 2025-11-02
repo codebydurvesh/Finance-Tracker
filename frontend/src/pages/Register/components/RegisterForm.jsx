@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import { isValidEmail, isValidPassword } from "../../../utils/helpers";
+import { isValidPassword } from "../../../utils/helpers";
 
-const RegisterForm = ({ onSubmit, loading }) => {
+const RegisterForm = ({ onSubmit, loading, verifiedEmail }) => {
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -21,12 +20,7 @@ const RegisterForm = ({ onSubmit, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
+    if (!formData.name || !formData.password || !formData.confirmPassword) {
       return { success: false, message: "Please fill in all fields" };
     }
 
@@ -34,13 +28,6 @@ const RegisterForm = ({ onSubmit, loading }) => {
       return {
         success: false,
         message: "Name must be at least 2 characters long",
-      };
-    }
-
-    if (!isValidEmail(formData.email)) {
-      return {
-        success: false,
-        message: "Please enter a valid email address",
       };
     }
 
@@ -59,83 +46,81 @@ const RegisterForm = ({ onSubmit, loading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="auth-form">
-      <div className="form-group">
-        <label htmlFor="name">Full Name</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Enter your full name"
-          disabled={loading}
-        />
+    <div className="register-form-step">
+      <div className="step-header">
+        <div className="step-icon">✅</div>
+        <h2>Complete Your Registration</h2>
+        <p className="verified-email">
+          <span className="check-icon">✓</span> {verifiedEmail}
+        </p>
       </div>
 
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Enter your email"
-          disabled={loading}
-        />
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <div className="password-input-wrapper">
+      <form onSubmit={handleSubmit} className="auth-form">
+        <div className="form-group">
+          <label htmlFor="name">Full Name</label>
           <input
-            type={showPassword ? "text" : "password"}
-            id="password"
-            name="password"
-            value={formData.password}
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
             onChange={handleChange}
-            placeholder="At least 6 characters"
+            placeholder="Enter your full name"
             disabled={loading}
+            autoFocus
           />
-          <button
-            type="button"
-            className="password-toggle-btn"
-            onClick={() => setShowPassword(!showPassword)}
-            tabIndex={-1}
-          >
-            {showPassword ? "👁️" : "👁️‍🗨️"}
-          </button>
         </div>
-      </div>
 
-      <div className="form-group">
-        <label htmlFor="confirmPassword">Confirm Password</label>
-        <div className="password-input-wrapper">
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            id="confirmPassword"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            placeholder="Re-enter your password"
-            disabled={loading}
-          />
-          <button
-            type="button"
-            className="password-toggle-btn"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            tabIndex={-1}
-          >
-            {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-          </button>
+        <div className="form-group">
+          <label htmlFor="password">Password</label>
+          <div className="password-input-wrapper">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="At least 6 characters"
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? "👁️" : "👁️‍🗨️"}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <button type="submit" className="auth-button" disabled={loading}>
-        {loading ? "Creating account..." : "Register"}
-      </button>
-    </form>
+        <div className="form-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
+          <div className="password-input-wrapper">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Re-enter your password"
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="password-toggle-btn"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" className="auth-button" disabled={loading}>
+          {loading ? "Creating account..." : "Create Account"}
+        </button>
+      </form>
+    </div>
   );
 };
 
