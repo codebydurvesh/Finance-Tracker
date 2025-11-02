@@ -20,7 +20,9 @@ process.on("uncaughtException", (err) => {
 // Connect to MongoDB
 connectDB();
 
-// Verify email configuration on startup (only if email credentials exist)
+// Email verification is now done on-demand when OTP is sent
+// Commenting out startup verification to avoid blocking server startup
+/*
 if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
   const { verifyEmailConfig } = require("./config/emailConfig");
   verifyEmailConfig().catch((err) => {
@@ -37,6 +39,11 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
     "💡 Set EMAIL_USER and EMAIL_PASSWORD environment variables to enable emails."
   );
 }
+*/
+
+console.log(
+  "📧 Email service configured. Brevo SMTP will be used for OTP emails."
+);
 
 // Middleware
 app.use(cors());

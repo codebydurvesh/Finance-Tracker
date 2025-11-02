@@ -54,9 +54,9 @@ const createTransporter = () => {
 
   return nodemailer.createTransport({
     ...config,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
+    connectionTimeout: 30000, // 30 seconds (increased for Render)
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
   });
 };
 
