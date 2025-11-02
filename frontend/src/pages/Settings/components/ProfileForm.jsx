@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { isValidEmail } from "../../../utils/helpers";
+import EmailChangeModal from "./EmailChangeModal";
 
-const ProfileForm = ({ user, onSubmit, isGoogleUser }) => {
+const ProfileForm = ({ user, onSubmit, isGoogleUser, onEmailUpdated }) => {
   const [profileData, setProfileData] = useState({
     name: user?.name || "",
     email: user?.email || "",
   });
   const [profileLoading, setProfileLoading] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   const handleProfileChange = (e) => {
     setProfileData({
@@ -22,20 +24,12 @@ const ProfileForm = ({ user, onSubmit, isGoogleUser }) => {
       return { success: false, message: "Name cannot be empty" };
     }
 
-    if (!profileData.email.trim()) {
-      return { success: false, message: "Email cannot be empty" };
-    }
-
-    if (!isValidEmail(profileData.email)) {
-      return { success: false, message: "Please enter a valid email address" };
-    }
-
+    // Only update name, not email (email changes through OTP modal)
     setProfileLoading(true);
 
     try {
       await onSubmit({
         name: profileData.name,
-        email: profileData.email,
       });
       return { success: true };
     } catch (err) {
@@ -48,6 +42,19 @@ const ProfileForm = ({ user, onSubmit, isGoogleUser }) => {
     } finally {
       setProfileLoading(false);
     }
+  };
+
+  const handleEmailChange = () => {
+    if (isGoogleUser) return;
+    setShowEmailModal(true);
+  };
+
+  const handleEmailUpdated = (updatedUser) => {
+    setProfileData({
+      ...profileData,
+      email: updatedUser.email,
+    });
+    onEmailUpdated(updatedUser);
   };
 
   return (
@@ -69,15 +76,26 @@ const ProfileForm = ({ user, onSubmit, isGoogleUser }) => {
 
         <div className="form-group">
           <label htmlFor="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={profileData.email}
-            onChange={handleProfileChange}
-            placeholder="Enter your email"
-            disabled={profileLoading || isGoogleUser}
-          />
+          <div className="email-field-wrapper">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={profileData.email}
+              readOnly
+              disabled
+              placeholder="Enter your email"
+            />
+            {!isGoogleUser && (
+              <button
+                type="button"
+                className="change-email-btn"
+                onClick={handleEmailChange}
+              >
+                Change Email
+              </button>
+            )}
+          </div>
           {isGoogleUser && (
             <span className="field-info">
               ℹ️ Email cannot be changed for Google accounts
@@ -93,6 +111,14 @@ const ProfileForm = ({ user, onSubmit, isGoogleUser }) => {
           {profileLoading ? "Updating..." : "Save Profile"}
         </button>
       </form>
+
+      {showEmailModal && (
+        <EmailChangeModal
+          currentEmail={user.email}
+          onClose={() => setShowEmailModal(false)}
+          onEmailUpdated={handleEmailUpdated}
+        />
+      )}
     </div>
   );
 };
