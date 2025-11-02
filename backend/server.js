@@ -1,4 +1,12 @@
-require("dotenv").config();
+// Only load .env in development (Render injects env vars directly)
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+} else {
+  console.log(
+    "🚀 Running in production mode - using Render environment variables"
+  );
+}
+
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
