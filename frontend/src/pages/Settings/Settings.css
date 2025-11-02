@@ -3,23 +3,38 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 20px;
   position: relative;
-}
-
-.back-btn {
-  margin-top: 20px;
-  color: black;
-}
-
-.back-btn:hover {
-  background: #667eea;
-  color: black;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
 }
 
 .settings-content {
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
+}
+
+.back-btn-container {
+  
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.back-btn {
+  width: 30%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .settings-header {
@@ -189,6 +204,268 @@
   line-height: 1.6;
 }
 
+/* Email Field with Change Button */
+.email-field-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.email-field-wrapper input {
+  flex: 1;
+  background: #f5f5f5 !important;
+  cursor: not-allowed;
+}
+
+.change-email-btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.change-email-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideUp 0.3s;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #999;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+.modal-close:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.email-change-step {
+  margin-top: 10px;
+}
+
+.email-change-step .step-header {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.email-change-step .step-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.email-change-step .step-header h2 {
+  margin: 10px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.email-change-step .step-header p {
+  color: #666;
+  font-size: 0.95rem;
+  margin: 5px 0;
+}
+
+.current-email-info {
+  background: #f5f7ff;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.current-email-info strong {
+  color: #333;
+}
+
+.modal-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 20px;
+}
+
+.modal-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.modal-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.modal-back-btn {
+  width: 100%;
+  padding: 12px;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.modal-back-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.modal-back-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* OTP Input Styles (reused from Register) */
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.otp-input {
+  width: 45px;
+  height: 55px;
+  font-size: 24px;
+  text-align: center;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s;
+  font-weight: 600;
+  color: #333;
+}
+
+.otp-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.otp-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.otp-info {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.time-left {
+  color: #667eea;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.time-expired {
+  color: #f44336;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.resend-section {
+  text-align: center;
+  color: #666;
+  font-size: 0.95rem;
+  margin-top: 15px;
+}
+
+.resend-btn {
+  background: none;
+  border: none;
+  color: #667eea;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.resend-btn:hover:not(:disabled) {
+  color: #764ba2;
+}
+
+.resend-btn:disabled {
+  color: #999;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .settings-container {
@@ -217,5 +494,193 @@
 
   .settings-section h2 {
     font-size: 1.2rem;
+  }
+
+  .email-field-wrapper {
+    flex-direction: column;
+  }
+
+  .change-email-btn {
+    width: 100%;
+  }
+
+  .modal-content {
+    padding: 20px;
+  }
+
+  .otp-input {
+    width: 40px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .otp-input-container {
+    gap: 8px;
+  }
+}
+
+/* Danger Zone */
+.danger-zone {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+  border-left: 4px solid #f44336;
+  margin-top: 30px;
+}
+
+.danger-zone h2 {
+  color: #f44336;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.danger-zone-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+.danger-zone-info h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.danger-zone-info p {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.danger-btn {
+  padding: 12px 24px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+  font-size: 0.95rem;
+}
+
+.danger-btn:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+/* Delete Account Modal Specific Styles */
+.delete-modal .danger-header h2 {
+  color: #f44336;
+}
+
+.danger-warning {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.danger-warning h3 {
+  margin: 0 0 10px 0;
+  color: #856404;
+  font-size: 1rem;
+}
+
+.danger-warning p {
+  margin: 0 0 10px 0;
+  color: #856404;
+  font-size: 0.95rem;
+}
+
+.danger-warning ul {
+  margin: 10px 0 0 0;
+  padding-left: 20px;
+  color: #856404;
+}
+
+.danger-warning li {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+.confirmation-text {
+  color: #666;
+  font-size: 0.95rem;
+  text-align: center;
+  margin: 20px 0;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-cancel-btn {
+  flex: 1;
+  padding: 14px;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+}
+
+.modal-cancel-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.modal-danger-btn {
+  flex: 1;
+  padding: 14px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.modal-danger-btn:hover:not(:disabled) {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.modal-danger-btn:disabled,
+.modal-cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive for Danger Zone */
+@media (max-width: 768px) {
+  .danger-zone-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .danger-btn {
+    width: 100%;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
   }
 }

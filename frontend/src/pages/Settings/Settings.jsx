@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { updateUserProfile, changePassword } from "../../services/userService";
 import { toast, ToastContainer } from "react-toastify";
@@ -7,10 +8,13 @@ import SettingsHeader from "./components/SettingsHeader";
 import ProfileForm from "./components/ProfileForm";
 import PasswordForm from "./components/PasswordForm";
 import GoogleInfo from "./components/GoogleInfo";
+import DangerZone from "./components/DangerZone";
+import Footer from "../../components/Footer/Footer";
 import "./Settings.css";
 
 const Settings = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [error, setError] = useState("");
 
   const isGoogleUser = user?.googleId;
@@ -20,7 +24,6 @@ const Settings = () => {
     try {
       const response = await updateUserProfile({
         name: profileData.name,
-        email: profileData.email,
       });
 
       updateUser(response.user);
@@ -33,6 +36,10 @@ const Settings = () => {
       toast.error(errorMessage);
       throw err;
     }
+  };
+
+  const handleEmailUpdated = (updatedUser) => {
+    updateUser(updatedUser);
   };
 
   const handlePasswordChange = async (passwordData) => {
@@ -54,6 +61,14 @@ const Settings = () => {
     }
   };
 
+  const handleAccountDeleted = () => {
+    toast.success("Account deleted successfully. Goodbye!");
+    setTimeout(() => {
+      logout();
+      navigate("/login");
+    }, 2000);
+  };
+
   return (
     <div className="settings-container">
       <ToastContainer
@@ -71,11 +86,18 @@ const Settings = () => {
       <div className="settings-content">
         <SettingsHeader />
 
+        <div className="back-btn-container">
+          <button onClick={() => navigate("/dashboard")} className="back-btn">
+            ← Back to Dashboard
+          </button>
+        </div>
+
         {error && <div className="error-message">{error}</div>}
 
         <ProfileForm
           user={user}
           onSubmit={handleProfileUpdate}
+          onEmailUpdated={handleEmailUpdated}
           isGoogleUser={isGoogleUser}
         />
 
@@ -84,7 +106,11 @@ const Settings = () => {
         ) : (
           <GoogleInfo />
         )}
+
+        <DangerZone user={user} onAccountDeleted={handleAccountDeleted} />
       </div>
+
+      <Footer />
     </div>
   );
 };

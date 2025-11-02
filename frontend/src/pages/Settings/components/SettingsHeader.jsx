@@ -8,9 +8,6 @@ const SettingsHeader = () => {
     <div className="settings-header">
       <h1>⚙️ Settings</h1>
       <p>Manage your account settings</p>
-      <button onClick={() => navigate("/dashboard")} className="back-btn">
-        ← Back to Dashboard
-      </button>
     </div>
   );
 };
