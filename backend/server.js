@@ -20,14 +20,23 @@ process.on("uncaughtException", (err) => {
 // Connect to MongoDB
 connectDB();
 
-// Verify email configuration on startup
-const { verifyEmailConfig } = require("./config/emailConfig");
-verifyEmailConfig().catch((err) => {
-  console.error("⚠️ Email configuration warning:", err.message);
+// Verify email configuration on startup (only if email credentials exist)
+if (process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
+  const { verifyEmailConfig } = require("./config/emailConfig");
+  verifyEmailConfig().catch((err) => {
+    console.error("⚠️ Email configuration warning:", err.message);
+    console.log(
+      "🔧 OTP emails may not work. Check EMAIL_USER and EMAIL_PASSWORD env variables."
+    );
+  });
+} else {
   console.log(
-    "🔧 OTP emails may not work. Check EMAIL_USER and EMAIL_PASSWORD env variables."
+    "⚠️ Email credentials not found. OTP functionality will be disabled."
   );
-});
+  console.log(
+    "💡 Set EMAIL_USER and EMAIL_PASSWORD environment variables to enable emails."
+  );
+}
 
 // Middleware
 app.use(cors());
