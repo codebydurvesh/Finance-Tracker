@@ -1,0 +1,18 @@
+{
+  "short_name": "Finance Tracker",
+  "name": "Finance Tracker - Manage Your Money",
+  "description": "Track your income, expenses, and budget with Finance Tracker",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "orientation": "portrait"
+}
