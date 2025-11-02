@@ -24,7 +24,9 @@ connectDB();
 const { verifyEmailConfig } = require("./config/emailConfig");
 verifyEmailConfig().catch((err) => {
   console.error("⚠️ Email configuration warning:", err.message);
-  console.log("🔧 OTP emails may not work. Check EMAIL_USER and EMAIL_PASSWORD env variables.");
+  console.log(
+    "🔧 OTP emails may not work. Check EMAIL_USER and EMAIL_PASSWORD env variables."
+  );
 });
 
 // Middleware
@@ -46,7 +48,7 @@ app.get("/api/health", async (req, res) => {
   try {
     const { verifyEmailConfig } = require("./config/emailConfig");
     const emailReady = await verifyEmailConfig();
-    
+
     res.json({
       status: "healthy",
       timestamp: new Date().toISOString(),
