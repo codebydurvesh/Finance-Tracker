@@ -1,11 +1,25 @@
 // Create reusable transporter
 const createTransporter = () => {
   // Import nodemailer here to avoid module caching issues
-  const nodemailer = require("nodemailer");
+  let nodemailer;
+
+  try {
+    nodemailer = require("nodemailer");
+    console.log("📦 nodemailer loaded:", typeof nodemailer);
+    console.log("📦 createTransport type:", typeof nodemailer?.createTransport);
+    console.log(
+      "📦 nodemailer keys:",
+      Object.keys(nodemailer || {}).join(", ")
+    );
+  } catch (err) {
+    console.error("❌ Failed to require nodemailer:", err.message);
+    throw err;
+  }
 
   // Validate nodemailer loaded correctly
   if (!nodemailer || typeof nodemailer.createTransport !== "function") {
     console.error("❌ nodemailer.createTransport is not available");
+    console.error("❌ nodemailer value:", nodemailer);
     throw new Error(
       "Email service unavailable - nodemailer not loaded correctly"
     );
