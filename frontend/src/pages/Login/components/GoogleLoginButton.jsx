@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 
 const GoogleLoginButton = ({ onGoogleLogin }) => {
   const googleButtonRef = useRef(null);
+  const [buttonWidth, setButtonWidth] = useState(350);
 
   const handleGoogleLogin = useCallback(
     async (credentialResponse) => {
@@ -9,6 +10,25 @@ const GoogleLoginButton = ({ onGoogleLogin }) => {
     },
     [onGoogleLogin]
   );
+
+  // Calculate responsive button width
+  useEffect(() => {
+    const updateButtonWidth = () => {
+      if (googleButtonRef.current) {
+        const containerWidth = googleButtonRef.current.offsetWidth;
+        const maxWidth = Math.min(containerWidth, 400);
+        const minWidth = 200;
+        setButtonWidth(Math.max(minWidth, maxWidth));
+      }
+    };
+
+    updateButtonWidth();
+    window.addEventListener('resize', updateButtonWidth);
+
+    return () => {
+      window.removeEventListener('resize', updateButtonWidth);
+    };
+  }, []);
 
   useEffect(() => {
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
@@ -38,7 +58,7 @@ const GoogleLoginButton = ({ onGoogleLogin }) => {
             theme: "outline",
             size: "large",
             text: "signin_with",
-            width: 350,
+            width: buttonWidth,
             shape: "rectangular",
             logo_alignment: "left",
           });
@@ -67,7 +87,7 @@ const GoogleLoginButton = ({ onGoogleLogin }) => {
         document.body.removeChild(script);
       }
     };
-  }, [handleGoogleLogin]);
+  }, [handleGoogleLogin, buttonWidth]);
 
   return <div ref={googleButtonRef} className="google-signin-wrapper"></div>;
 };

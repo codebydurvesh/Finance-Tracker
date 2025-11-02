@@ -159,6 +159,23 @@
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
+  width: 100%;
+}
+
+.google-signin-wrapper > div {
+  width: 100% !important;
+  max-width: 400px;
+}
+
+.google-signin-wrapper iframe {
+  max-width: 100% !important;
+}
+
+/* Ensure Google button is responsive on mobile */
+@media (max-width: 480px) {
+  .google-signin-wrapper {
+    padding: 0 10px;
+  }
 }
 
 .auth-button {
