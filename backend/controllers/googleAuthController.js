@@ -64,7 +64,6 @@ const googleLogin = async (req, res) => {
         name: user.name,
         email: user.email,
         monthlyBudget: user.monthlyBudget,
-        currency: user.currency,
         profilePicture: user.profilePicture,
       },
       token,
